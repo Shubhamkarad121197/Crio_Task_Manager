@@ -1,14 +1,18 @@
-const express=require('express');
-const routes=express.Router();
-const taskSchma=require('../models/taskManagerModel');
-const {addTask,getTask,updateTask,deleteTask}=require('../controller/taskManager')
+const express = require('express');
+const router = express.Router();
+const upload = require('../middleWare/upload');
+const {
+  addTask,
+  getTask,
+  updateTask,
+  deleteTask,
+} = require('../controller/taskManager');
 
+// ⛔ THIS LINE WAS MISSING EARLIER
+router.post('/tasks', upload.single('file'), addTask);
 
-routes.post('/tasks',addTask);
-routes.get('/tasks',getTask)
-routes.put("/:id", updateTask);
-routes.delete("/:id", deleteTask);
+router.get('/tasks', getTask);
+router.put('/tasks/:id', updateTask);
+router.delete('/tasks/:id', deleteTask);
 
-module.exports=routes;
-
-
+module.exports = router;

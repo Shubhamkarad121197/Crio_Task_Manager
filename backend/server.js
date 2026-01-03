@@ -8,7 +8,7 @@ const connectDB=require('./src/config/db')
 
 const app=express();
 const PORT=process.env.PORT||8082;
-
+app.use(cors())
 app.use(express.json())
 
 app.use('/api',taskManagerRoute)

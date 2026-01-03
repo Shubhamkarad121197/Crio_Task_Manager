@@ -1,57 +1,84 @@
-const taskSchema=require('../models/taskManagerModel')
+const Task = require('../models/taskManagerModel');
 
-
-exports.addTask=async (req,res)=>{
-    try{
-        const addTask=await taskSchema.create(req.body);
-        res.status(201).json({message:'Task Created Successfully',data:addTask})
-    }
-    catch(err){
-         res.status(500).json({message:err})
-    }
-    
-
-    
-}
-
-exports.getTask=async (req,res)=>{
-    try{
-        const getAllTask=await taskSchema.find().sort({createdOn:-1});
-        res.status(200).json({data:getAllTask})
-    }
-    catch(err){
-         res.status(501).json({message:err})
-    }
-}
-
-/* UPDATE PRODUCT */
-exports.updateTask = async (req, res, next) => {
+/* ================= CREATE TASK ================= */
+exports.addTask = async (req, res) => {
   try {
-    const Task = await taskSchema.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    console.log('BODY:', req.body);
+    console.log('FILE:', req.file);
 
-    if (!Task)
-      return res.status(404).json({ message: "Tasks not found" });
+    const { title, description, deadline } = req.body;
 
-    res.status(200).json({ success: true, data: Task });
+    if (!title || !description || !deadline) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    const task = await Task.create({
+      title,
+      description,
+      deadline,
+      linkedFile: req.file ? req.file.buffer : null,
+    });
+
+    res.status(201).json({
+      message: 'Task Created Successfully',
+      data: task,
+    });
   } catch (error) {
-    next(error);
+    console.error('ADD TASK ERROR:', error);
+    res.status(500).json({ message: error.message });
   }
 };
 
-/* DELETE PRODUCT */
-exports.deleteTask = async (req, res, next) => {
+
+/* ================= GET ALL TASKS ================= */
+exports.getTask = async (req, res) => {
   try {
-    const Task = await Product.findByIdAndDelete(req.params.id);
+    const tasks = await Task.find().sort({ createdAt: -1 });
 
-    if (!Task)
-      return res.status(404).json({ message: "Product not found" });
-
-    res.status(200).json({ success: true, message: "Product deleted" });
+    res.status(200).json({ data: tasks });
   } catch (error) {
-    next(error);
+    console.error('GET TASK ERROR:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+/* ================= UPDATE TASK ================= */
+exports.updateTask = async (req, res) => {
+  try {
+    const updatedTask = await Task.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedTask) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    res.status(200).json({
+      message: 'Task Updated Successfully',
+      data: updatedTask,
+    });
+  } catch (error) {
+    console.error('UPDATE TASK ERROR:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+/* ================= DELETE TASK ================= */
+exports.deleteTask = async (req, res) => {
+  try {
+    const deletedTask = await Task.findByIdAndDelete(req.params.id);
+
+    if (!deletedTask) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    res.status(200).json({
+      message: 'Task Deleted Successfully',
+    });
+  } catch (error) {
+    console.error('DELETE TASK ERROR:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
