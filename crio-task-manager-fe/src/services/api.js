@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api=axios.create({
-    baseURL:'http://localhost:8082/api',
+    baseURL:'https://crio-task-manager-8zpk.onrender.com/api/tasks/api',
     headers:{
         "Content-Type":"Application/json"
     },
